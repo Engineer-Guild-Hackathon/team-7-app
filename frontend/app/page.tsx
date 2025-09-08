@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Monitor, Settings } from "lucide-react"
+import { GoalSetting } from "@/components/goal-setting"
 
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { TimeDistributionChart } from "@/components/time-distribution-chart"
@@ -203,8 +204,9 @@ export default function ScreenTimeApp() {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard">ダッシュボード</TabsTrigger>
+            <TabsTrigger value="goals">目標設定</TabsTrigger>
             <TabsTrigger value="apps">アプリ管理</TabsTrigger>
             <TabsTrigger value="daily">日次レポート</TabsTrigger>
             <TabsTrigger value="weekly">週次レポート</TabsTrigger>
@@ -234,6 +236,11 @@ export default function ScreenTimeApp() {
               aiAnalysisResult={aiAnalysisResult}
               analyzeWithAI={analyzeWithAI}
             />
+          </TabsContent>
+
+          {/* Goals Tab */}
+          <TabsContent value="goals" className="space-y-6">
+            <GoalSetting />
           </TabsContent>
 
           {/* Apps Management Tab */}
