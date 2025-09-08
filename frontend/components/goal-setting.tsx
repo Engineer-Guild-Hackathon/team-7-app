@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Target, Plus, MessageCircle, CheckCircle2, Circle, Calendar, TrendingUp } from "lucide-react"
+import { GoalRoadmap } from "./goal-roadmap"
 
 interface Goal {
     id: string
@@ -341,10 +342,11 @@ export function GoalSetting({}: GoalSettingProps) {
                 <CardContent className="space-y-6">
                 {/* Goal Details */}
                 <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="overview">概要</TabsTrigger>
                     <TabsTrigger value="progress">進捗</TabsTrigger>
                     <TabsTrigger value="subgoals">小目標</TabsTrigger>
+                    <TabsTrigger value="roadmap">道のり</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview" className="space-y-4">
@@ -432,6 +434,10 @@ export function GoalSetting({}: GoalSettingProps) {
                         <Plus className="h-4 w-4" />
                         </Button>
                     </div>
+                    </TabsContent>
+
+                    <TabsContent value="roadmap" className="space-y-4">
+                    <GoalRoadmap goal={goal} />
                     </TabsContent>
                 </Tabs>
                 </CardContent>
