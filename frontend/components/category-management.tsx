@@ -83,13 +83,20 @@ export function CategoryManagement({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {categories.map((category) => (
+                {/* その他カテゴリを常に一番下に */}
+                {[...categories]
+                .sort((a, b) => {
+                    if (a.id === "other") return 1
+                    if (b.id === "other") return -1
+                    return 0
+                })
+                .map((category) => (
                 <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
                     <span className="font-medium">{category.name}</span>
                     </div>
-                    {!["study", "break", "other"].includes(category.id) && (
+                    {!["study", "other"].includes(category.id) && (
                     <Button
                         variant="ghost"
                         size="sm"

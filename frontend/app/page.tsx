@@ -27,10 +27,10 @@ const initialAppUsage = [
 
 export default function ScreenTimeApp() {
   const [categories, setCategories] = useState([
-    { id: "study", name: "勉強", color: "hsl(var(--chart-1))" },
-    { id: "break", name: "息抜き", color: "hsl(var(--chart-2))" },
-    { id: "other", name: "その他", color: "hsl(var(--chart-3))" },
+  { id: "study", name: "勉強", color: "hsl(var(--chart-1))" },
+  { id: "other", name: "その他", color: "hsl(var(--chart-2))" },
   ])
+
   const [newCategoryName, setNewCategoryName] = useState("")
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [studyGoal, setStudyGoal] = useState(8)
