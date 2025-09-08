@@ -437,7 +437,7 @@ export function GoalSetting({}: GoalSettingProps) {
                     </TabsContent>
 
                     <TabsContent value="roadmap" className="space-y-4">
-                    <GoalRoadmap goal={goal} />
+                    <GoalRoadmap goal={goal} onToggleSubGoal={toggleSubGoal} />
                     </TabsContent>
                 </Tabs>
                 </CardContent>
