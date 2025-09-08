@@ -1,0 +1,36 @@
+# Node.js の依存
+node_modules/
+
+# npm / pnpm lock ファイルは通常コミットされるけど
+# lock ファイルを無視したい場合は以下を追加（推奨はコミット）
+# package-lock.json
+# pnpm-lock.yaml
+
+# ビルド成果物
+.next/
+dist/
+out/
+
+# 環境設定ファイル
+.env
+.env.local
+.env.*.local
+
+# OS 一時ファイル
+.DS_Store
+Thumbs.db
+
+# IDE / エディタ
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# log ファイル
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# coverage
+coverage/
