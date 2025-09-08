@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
 import { CheckCircle2, Circle, MapPin, Flag, Calendar } from "lucide-react"
 
 interface Goal {
@@ -26,9 +27,10 @@ interface SubGoal {
 
 interface GoalRoadmapProps {
     goal: Goal
+    onToggleSubGoal: (goalId: string, subGoalId: string) => void
 }
 
-export function GoalRoadmap({ goal }: GoalRoadmapProps) {
+export function GoalRoadmap({ goal, onToggleSubGoal }: GoalRoadmapProps) {
     const completedSubGoals = goal.subGoals.filter((sub) => sub.completed).length
     const totalSubGoals = goal.subGoals.length
 
@@ -66,17 +68,26 @@ export function GoalRoadmap({ goal }: GoalRoadmapProps) {
             <div className="space-y-6 ml-6">
                 {goal.subGoals.map((subGoal, index) => (
                 <div key={subGoal.id} className="flex items-start gap-4">
-                    <div
-                    className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                        subGoal.completed ? "bg-primary border-primary" : "bg-background border-muted-foreground"
-                    }`}
+                    <Button
+                    variant="ghost"
+                    size="sm"
+                    className="relative z-10 w-8 h-8 p-0 rounded-full hover:bg-transparent"
+                    onClick={() => onToggleSubGoal(goal.id, subGoal.id)}
                     >
-                    {subGoal.completed ? (
+                    <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-200 ${
+                        subGoal.completed
+                            ? "bg-primary border-primary hover:bg-primary/90"
+                            : "bg-background border-muted-foreground hover:border-primary hover:bg-primary/10"
+                        }`}
+                    >
+                        {subGoal.completed ? (
                         <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
-                    ) : (
+                        ) : (
                         <Circle className="h-4 w-4 text-muted-foreground" />
-                    )}
+                        )}
                     </div>
+                    </Button>
                     <div className="flex-1 pb-4">
                     <div className={`font-medium ${subGoal.completed ? "text-primary" : "text-foreground"}`}>
                         マイルストーン {index + 1}
@@ -97,6 +108,14 @@ export function GoalRoadmap({ goal }: GoalRoadmapProps) {
                     <Badge variant={subGoal.completed ? "default" : "secondary"} className="mt-2 text-xs">
                         {subGoal.completed ? "完了" : "進行中"}
                     </Badge>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2 mt-2 h-6 text-xs bg-transparent"
+                        onClick={() => onToggleSubGoal(goal.id, subGoal.id)}
+                    >
+                        {subGoal.completed ? "未完了にする" : "完了にする"}
+                    </Button>
                     </div>
                 </div>
                 ))}
