@@ -31,6 +31,13 @@ export default function ScreenTimeApp() {
   { id: "other", name: "その他", color: "hsl(var(--chart-2))" },
   ])
 
+  /* 常にその他が一番下に来るようにソート */
+  const sortedCategories = [...categories].sort((a, b) => {
+    if (a.id === "other") return 1
+    if (b.id === "other") return -1
+    return 0
+  })
+
   const [newCategoryName, setNewCategoryName] = useState("")
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [studyGoal, setStudyGoal] = useState(8)
@@ -226,7 +233,11 @@ export default function ScreenTimeApp() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <TimeDistributionChart pieData={pieData} />
 
-              <AppUsageChart appUsage={appUsage} categories={categories} updateAppCategory={updateAppCategory} />
+              <AppUsageChart
+                appUsage={appUsage}
+                categories={sortedCategories}
+                updateAppCategory={updateAppCategory}
+              />
             </div>
 
             <AIFeedback
@@ -246,7 +257,7 @@ export default function ScreenTimeApp() {
           {/* Apps Management Tab */}
           <TabsContent value="apps" className="space-y-6">
             <CategoryManagement
-              categories={categories}
+              categories={sortedCategories}
               newCategoryName={newCategoryName}
               setNewCategoryName={setNewCategoryName}
               isCategoryDialogOpen={isCategoryDialogOpen}
