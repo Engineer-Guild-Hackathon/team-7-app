@@ -41,102 +41,161 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
     const [aiConversation, setAiConversation] = useState<{ role: string; message: string }[]>([])
     const [aiInput, setAiInput] = useState("")
 
-    const sendAiMessage = () => {
+    const sendAiMessage = async () => {
         if (aiInput.trim()) {
-        const newConversation = [...aiConversation, { role: "user", message: aiInput }]
+            const newConversation = [
+            ...aiConversation,
+            { role: "user", message: aiInput },
+            ];
+            setAiConversation(newConversation);
+            setAiInput("");
 
-        // Simulate AI response
-        setTimeout(() => {
-            let aiResponse = ""
-            if (newConversation.length === 1) {
-            aiResponse =
-                "こんにちは！目標設定のお手伝いをさせていただきます。まず、どのような分野で成長したいか教えてください。例：プログラミング、語学、資格取得、健康管理など"
-            } else if (aiInput.includes("プログラミング")) {
-            aiResponse =
-                "プログラミングスキルの向上ですね！具体的にはどの言語や技術に興味がありますか？また、なぜプログラミングを学びたいのか理由を教えてください。"
-            } else {
-            aiResponse =
-                "なるほど、それは素晴らしい目標ですね。その目標を達成したい理由と、達成後にどうなりたいかを詳しく教えてください。"
+            try {
+            const res = await fetch("/api/ai-goals", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                messages: [
+                    { role: "system", content: "あなたは目標設定をサポートするアシスタントです。" },
+                    ...newConversation.map((c) => ({
+                    role: c.role === "user" ? "user" : "assistant",
+                    content: c.message,
+                    })),
+                ],
+                }),
+            });
+
+            const data = await res.json();
+
+            if (data.type === "message") {
+                setAiConversation([
+                ...newConversation,
+                { role: "assistant", message: data.text },
+                ]);
+            } else if (data.type === "goal") {
+                setPreviewGoal(data.goal); // 🔽 ここでプレビューに反映
             }
+            } catch (error) {
+            console.error(error);
+            }
+        }
+    };
 
-            setAiConversation([...newConversation, { role: "ai", message: aiResponse }])
-        }, 1000)
 
-        setAiInput("")
+
+    const [previewGoal, setPreviewGoal] = useState<Goal | null>(null)
+
+    const generateAiGoal = async () => {
+        try {
+            const res = await fetch("/api/ai-goals", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                messages: aiConversation.map((c) => ({
+                role: c.role === "user" ? "user" : "assistant",
+                content: c.message,
+                })),
+            }),
+            })
+
+            const data = await res.json()
+            if (data.goal) {
+            setPreviewGoal(data.goal) // ← プレビューにセット
+            }
+        } catch (error) {
+            console.error(error)
         }
     }
 
-    const generateAiGoal = () => {
-        // Simulate AI goal generation based on conversation
-        const aiGoal: Goal = {
-        id: Date.now().toString(),
-        title: "AI提案：Web開発スキルマスター",
-        reason: "フリーランスとして独立し、場所に縛られない働き方を実現したい",
-        outcome: "月収50万円以上のフリーランス開発者になる",
-        scope: "フロントエンド・バックエンド・デプロイまでの全工程を習得",
-        deadline: "2024-12-31",
-        progress: 0,
-        subGoals: [
-            { id: "ai-1", title: "HTML/CSS/JavaScript基礎", completed: false, dueDate: "2024-02-29" },
-            { id: "ai-2", title: "React.js習得", completed: false, dueDate: "2024-04-30" },
-            { id: "ai-3", title: "Node.js/Express習得", completed: false, dueDate: "2024-06-30" },
-            { id: "ai-4", title: "データベース設計", completed: false, dueDate: "2024-08-31" },
-            { id: "ai-5", title: "ポートフォリオ作成", completed: false, dueDate: "2024-10-31" },
-        ],
-        createdAt: new Date().toISOString(),
-        }
 
-        onCreateGoal(aiGoal)
-        setIsAiDialogOpen(false)
-        setAiConversation([])
-    }
 
-    return (
+    {return (
         <Dialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen}>
-        <DialogTrigger asChild>
+            <DialogTrigger asChild>
             <Button variant="outline">
-            <MessageCircle className="h-4 w-4 mr-2" />
-            AIと対話して作成
+                <MessageCircle className="h-4 w-4 mr-2" />
+                AIと対話して作成
             </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh]">
             <DialogHeader>
-            <DialogTitle>AIと対話して目標を設定</DialogTitle>
-            <DialogDescription>AIがあなたの目標設定をサポートします</DialogDescription>
+                <DialogTitle>AIと対話して目標を設定</DialogTitle>
+                <DialogDescription>AIがあなたの目標設定をサポートします</DialogDescription>
             </DialogHeader>
+
             <div className="space-y-4">
-            <div className="h-64 overflow-y-auto border rounded-lg p-4 space-y-3">
+                {/* --- 対話ログ --- */}
+                <div className="h-64 overflow-y-auto border rounded-lg p-4 space-y-3">
                 {aiConversation.length === 0 && (
-                <div className="text-center text-muted-foreground">AIとの対話を開始してください</div>
+                    <div className="text-center text-muted-foreground">
+                    AIとの対話を開始してください
+                    </div>
                 )}
                 {aiConversation.map((msg, index) => (
-                <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
-                        msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                    key={index}
+                    className={`flex ${
+                        msg.role === "user" ? "justify-end" : "justify-start"
                     }`}
                     >
-                    {msg.message}
+                    <div
+                        className={`max-w-[80%] p-3 rounded-lg ${
+                        msg.role === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-foreground"
+                        }`}
+                    >
+                        {msg.message}
                     </div>
-                </div>
+                    </div>
                 ))}
-            </div>
-            <div className="flex gap-2">
+                </div>
+
+                {/* --- 入力欄 --- */}
+                <div className="flex gap-2">
                 <Input
-                value={aiInput}
-                onChange={(e) => setAiInput(e.target.value)}
-                placeholder="メッセージを入力..."
-                onKeyPress={(e) => e.key === "Enter" && sendAiMessage()}
+                    value={aiInput}
+                    onChange={(e) => setAiInput(e.target.value)}
+                    placeholder="メッセージを入力..."
+                    onKeyPress={(e) => e.key === "Enter" && sendAiMessage()}
                 />
                 <Button onClick={sendAiMessage}>送信</Button>
+                </div>
+
+                {/* --- 提案ボタン --- */}
+                {aiConversation.length >= 4 && (
+                <>
+                    <Button onClick={generateAiGoal} className="w-full">
+                    AIが提案する目標を作成
+                    </Button>
+
+                    {/* 🔽 プレビュー表示 */}
+                    {previewGoal && (
+                    <div className="border rounded-lg p-4 bg-muted">
+                        <h3 className="font-semibold mb-2">AI提案のプレビュー</h3>
+                        <p><strong>タイトル:</strong> {previewGoal.title}</p>
+                        <p><strong>理由:</strong> {previewGoal.reason}</p>
+                        <p><strong>成果:</strong> {previewGoal.outcome}</p>
+                        <p><strong>範囲:</strong> {previewGoal.scope}</p>
+                        <p><strong>期限:</strong> {previewGoal.deadline}</p>
+
+                        {/* ✅ 確定ボタン */}
+                        <Button
+                        className="w-full"
+                        onClick={() => {
+                            onCreateGoal(previewGoal)
+                            setPreviewGoal(null)         // プレビューをクリア
+                            setIsAiDialogOpen(false)     // ダイアログを閉じる
+                        }}
+                        >
+                        この目標で登録
+                        </Button>
+                    </div>
+                    )}
+                </>
+                )}
             </div>
-            {aiConversation.length >= 4 && (
-                <Button onClick={generateAiGoal} className="w-full">
-                AIが提案する目標を作成
-                </Button>
-            )}
-            </div>
-        </DialogContent>
+            </DialogContent>
         </Dialog>
-    )
+    )}
 }
