@@ -12,6 +12,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { MessageCircle } from "lucide-react"
+import { conversationTalkMemory } from "@/lib/conversation-talk-memory"
 
 interface Goal {
     id: string
@@ -72,16 +73,22 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
         }
     }
 
+    const sessionId = "user-123";
+    const messagesForSession = conversationTalkMemory[sessionId] ?? [];
     // --- 提案確認で JSON を生成 ---
     const generateAiGoal = async () => {
         try {
         const res = await fetch("/api/goal-ai-goal", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ sessionId: "user-123", messages: aiConversation }),
+            body: JSON.stringify({
+                sessionId,
+                messages: messagesForSession,   /* 全ての会話履歴を送信するように */
+            }),
         })
 
         const data = await res.json()
+        console.log(data.goal);
         if (data.type === "goal") {
             setPreviewGoal(data.goal)
         } else {
@@ -125,6 +132,7 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-foreground"
                     }`}
+                    style={{ whiteSpace: 'pre-wrap' }}
                     >
                     {msg.message}
                     </div>
