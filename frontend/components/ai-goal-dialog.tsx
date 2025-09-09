@@ -111,7 +111,7 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
             <div className="h-64 overflow-y-auto border rounded-lg p-4 space-y-3">
                 {aiConversation.length === 0 && (
                 <div className="text-center text-muted-foreground">
-                    AIとの対話を開始してください
+                    まずはあなたの目標を入力してください
                 </div>
                 )}
                 {aiConversation.map((msg, index) => (
