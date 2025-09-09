@@ -1,26 +1,24 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import {conversationTalkMemory } from "@/lib/conversation-talk-memory";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY_GOALAI!);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
-
-/* sessionIDごとに会話を記録 */
-const conversationMemory: Record<string, { role: string; content: string }[]> = {};
-
 
 export async function POST(req: Request) {
     const { sessionId, messages } = await req.json();
 
     // セッションの履歴がなければ初期化
-    if (!conversationMemory[sessionId]) conversationMemory[sessionId] = [];
+    if (!conversationTalkMemory[sessionId]) conversationTalkMemory[sessionId] = [];
 
     // 最新のユーザー入力だけを取り出す
     const latestUserMessage = messages[messages.length - 1];
 
     // 過去の会話（AIとユーザーの履歴）をフォーマット
-    const pastConversation = conversationMemory[sessionId]
+    /* 全ての会話の内容をグローバル変数として格納 */
+    const pastConversation = conversationTalkMemory[sessionId]
         .map(m => `${m.role === "user" ? "ユーザー" : "AI"}: ${m.content}`)
-        .join("\n");
+        .join("\n") ?? "";
 
     // AIに渡すプロンプト：過去の会話 + 最新ユーザー入力
         const prompt = `
@@ -59,8 +57,8 @@ export async function POST(req: Request) {
     const text = result.response.text();
 
     // 履歴に追加
-    conversationMemory[sessionId].push({ role: "user", content: latestUserMessage.content });
-    conversationMemory[sessionId].push({ role: "AI", content: text });
+    conversationTalkMemory[sessionId].push({ role: "user", content: latestUserMessage.content });
+    conversationTalkMemory[sessionId].push({ role: "AI", content: text });
 
     return NextResponse.json({ text });
 }
