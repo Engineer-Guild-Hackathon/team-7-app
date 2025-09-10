@@ -44,6 +44,16 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
     const [aiInput, setAiInput] = useState("")
     const [previewGoal, setPreviewGoal] = useState<Goal | null>(null)
 
+    /* 会話履歴を保存 */
+    const [conversation, setConversation] = useState<{ role: "user" | "AI"; content: string }[]>([]);
+    /* ユーザとAIそれぞれの発言を会話履歴に送信 */
+    const addUserMessage = (content: string) => {
+        setConversation(prev => [...prev, { role: "user", content }]);
+    };
+    const addAiMessage = (content: string) => {
+        setConversation(prev => [...prev, { role: "AI", content }]);
+    };
+
     // --- 通常の会話 ---
     const sendAiMessage = async () => {
         if (!aiInput.trim()) return
@@ -51,18 +61,27 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
         const latestMessage = { role: "user", content: aiInput }
         setAiInput("")
 
+        addUserMessage(latestMessage.content)
+        /* 送信する会話履歴をローカルで作成 */
+        const messagesToSend = [...conversation, latestMessage];
+
+        console.log("送信前の会話履歴: ", messagesToSend)
         try {
         const res = await fetch("/api/goal-ai-chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                sessionId: "user-123",
-                messages: [latestMessage],
+                conversation: messagesToSend,
+                latestMessage,
             }),
         })
 
         const data = await res.json()
         console.log(data.text);
+        console.log(latestMessage.content)
+        addAiMessage(data.text)
+        console.log("送信後の会話履歴: " , conversation)
+
         setAiConversation(prev => [
             ...prev,
             { role: "user", message: aiInput },
@@ -71,19 +90,18 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
         } catch (error) {
             console.error(error)
         }
+
     }
 
-    const sessionId = "user-123";
-    const messagesForSession = conversationTalkMemory[sessionId] ?? [];
     // --- 提案確認で JSON を生成 ---
     const generateAiGoal = async () => {
+        console.log("JSON生成前の会話履歴: ", conversation)
         try {
         const res = await fetch("/api/goal-ai-goal", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                sessionId,
-                messages: messagesForSession,   /* 全ての会話履歴を送信するように */
+                conversation,
             }),
         })
 
