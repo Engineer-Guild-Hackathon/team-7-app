@@ -24,6 +24,8 @@ interface CategoryManagementProps {
     categories: Category[]
     newCategoryName: string
     setNewCategoryName: (name: string) => void
+    newCategoryColor: string
+    setNewCategoryColor: (color: string) => void
     isCategoryDialogOpen: boolean
     setIsCategoryDialogOpen: (open: boolean) => void
     addCategory: () => void
@@ -34,6 +36,8 @@ export function CategoryManagement({
     categories,
     newCategoryName,
     setNewCategoryName,
+    newCategoryColor,
+    setNewCategoryColor,
     isCategoryDialogOpen,
     setIsCategoryDialogOpen,
     addCategory,
@@ -69,6 +73,17 @@ export function CategoryManagement({
                         onChange={(e) => setNewCategoryName(e.target.value)}
                         placeholder="例: 趣味"
                         onKeyDown={(e) => e.key === "Enter" && addCategory()}
+                        />
+                    </div>
+                    {/* 色選択 */}
+                    <div>
+                        <Label htmlFor="category-color">色</Label>
+                        <input
+                            id="category-color"
+                            type="color"
+                            value={newCategoryColor}
+                            onChange={(e) => setNewCategoryColor(e.target.value)}
+                            className="w-12 h-8 border rounded"
                         />
                     </div>
                     <div className="flex gap-2">

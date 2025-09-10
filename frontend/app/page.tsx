@@ -70,17 +70,20 @@ export default function ScreenTimeApp() {
     setAppUsage((prev) => prev.map((app) => (app.id === appId ? { ...app, type: newType } : app)))
   }
 
+  const [newCategoryColor, setNewCategoryColor] = useState("#ff0000")
+
   const addCategory = () => {
     if (newCategoryName.trim()) {
       const newId = newCategoryName.toLowerCase().replace(/\s+/g, "_")
       const newCategory = {
         id: newId,
         name: newCategoryName.trim(),
-        color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
+        color: newCategoryColor,
       }
       setCategories([...categories, newCategory])
       setCategoryApps((prev) => ({ ...prev, [newId]: [] }))
       setNewCategoryName("")
+      setNewCategoryColor("#ff0000")
       setIsCategoryDialogOpen(false)
     }
   }
