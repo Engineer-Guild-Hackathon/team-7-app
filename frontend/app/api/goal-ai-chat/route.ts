@@ -1,24 +1,15 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import {conversationTalkMemory } from "@/lib/conversation-talk-memory";
+//import {conversationTalkMemory } from "@/lib/conversation-talk-memory";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY_GOALAI!);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
 export async function POST(req: Request) {
-    const { sessionId, messages } = await req.json();
+    const { conversation, latestMessage } = await req.json();
 
-    // セッションの履歴がなければ初期化
-    if (!conversationTalkMemory[sessionId]) conversationTalkMemory[sessionId] = [];
-
-    // 最新のユーザー入力だけを取り出す
-    const latestUserMessage = messages[messages.length - 1];
-
-    // 過去の会話（AIとユーザーの履歴）をフォーマット
-    /* 全ての会話の内容をグローバル変数として格納 */
-    const pastConversation = conversationTalkMemory[sessionId]
-        .map(m => `${m.role === "user" ? "ユーザー" : "AI"}: ${m.content}`)
-        .join("\n") ?? "";
+    console.log("履歴: ", conversation);
+    console.log("最新入力: ", latestMessage);
 
     // AIに渡すプロンプト：過去の会話 + 最新ユーザー入力
         const prompt = `
@@ -33,6 +24,8 @@ export async function POST(req: Request) {
 
         - まだ全ての情報が揃っていない場合は、**JSONは返さずに**会話を続けてください。
         - ユーザーが答えに詰まった場合は、例や選択肢を提示してサポートしてください。
+        - 自然で簡潔な会話をしてください
+        - これまでの会話を元に会話してください
 
         会話の終わりの段階（全ての情報が揃った場合）では：
 
@@ -42,10 +35,10 @@ export async function POST(req: Request) {
         - 会話は自然で簡潔に行うこと
 
         これまでの会話：
-        ${pastConversation}
+        ${conversation}
 
         ユーザーの最新の発言：
-        ユーザー: ${latestUserMessage.content}
+        ユーザー: ${latestMessage}
 
         次にどう返答するか、自然に会話を進めてください。
         必要に応じて、小目標の提案やボタン押下の案内も含めてください。
@@ -55,10 +48,6 @@ export async function POST(req: Request) {
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-
-    // 履歴に追加
-    conversationTalkMemory[sessionId].push({ role: "user", content: latestUserMessage.content });
-    conversationTalkMemory[sessionId].push({ role: "AI", content: text });
 
     return NextResponse.json({ text });
 }
