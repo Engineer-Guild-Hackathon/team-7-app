@@ -12,24 +12,7 @@ type Message = {
 
 export async function POST(req: Request) {
     try {
-        const { sessionId, messages }: { sessionId: string; messages: Message[] } = await req.json();
-
-        console.log(sessionId);
-        console.log(messages);
-
-        if (!messages || messages.length === 0) {
-            return NextResponse.json({ type: "error", text: "会話履歴が空です" });
-        }
-
-        // 過去の会話を「ユーザー」「AI」でフォーマット
-        /* 過去の会話の内容をグローバル変数として取得 */
-        const pastConversation = messages
-            .map((m: Message) => `${m.role === "user" ? "ユーザー" : "AI"}: ${m.content}`)
-            .join("\n");
-
-        if (!pastConversation) {
-            return NextResponse.json({ type: "error", text: "会話履歴が空です"});
-        }
+        const { conversation } = await req.json();
 
         const prompt = `
             あなたは目標設定のアシスタントです。
@@ -52,7 +35,7 @@ export async function POST(req: Request) {
             }
 
             過去の会話：
-            ${pastConversation}
+            ${conversation}
             `;
 
             const result = await model.generateContent(prompt);
