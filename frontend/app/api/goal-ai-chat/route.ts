@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY_GOALAI!);
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-2.5-pro",
     generationConfig: {
         temperature: 0.4
     }
@@ -15,6 +15,7 @@ export async function POST(req: Request) {
 
     console.log("収集状況: ", status);
     console.log("最新入力: ", latestMessage);
+    console.log("会話履歴: ", conversation)
 
     // AIに渡すプロンプト：過去の会話 + 最新ユーザー入力
     const prompt = `
@@ -52,6 +53,7 @@ export async function POST(req: Request) {
     - まだ埋まっていない情報を順番に自然に質問する
     - 収集が完了したら小目標を提案して、最終確認する
     - 必ずJSONのみで返し、余計な文章や説明を絶対に追加しない
+    - 会話履歴を参照して返答を考えてください
 
     ## 例
     {
