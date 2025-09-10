@@ -45,13 +45,13 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
     const [previewGoal, setPreviewGoal] = useState<Goal | null>(null)
 
     /* 会話履歴を保存 */
-    const [conversation, setConversation] = useState<{ role: "user" | "AI"; content: string }[]>([]);
+    const [conversation, setConversation] = useState<string[]>([]);
     /* ユーザとAIそれぞれの発言を会話履歴に送信 */
     const addUserMessage = (content: string) => {
-        setConversation(prev => [...prev, { role: "user", content }]);
+        setConversation(prev => [...prev, content]);
     };
     const addAiMessage = (content: string) => {
-        setConversation(prev => [...prev, { role: "AI", content }]);
+        setConversation(prev => [...prev, content ]);
     };
 
     const [goalStatus, setGoalStatus] = useState({
@@ -69,9 +69,9 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
         const latestMessage = { role: "user", content: aiInput }
         setAiInput("")
 
-        const messageToSend = [...conversation, latestMessage]
+        const messageToSend = [...conversation, latestMessage.content]
 
-        console.log(messageToSend)
+        console.log("送信する前の会話履歴: ", messageToSend)
         try {
         const res = await fetch("/api/goal-ai-chat", {
             method: "POST",
