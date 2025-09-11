@@ -54,6 +54,7 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
         setConversation(prev => [...prev, content ]);
     };
 
+    /* 聞き出している情報を格納 */
     const [goalStatus, setGoalStatus] = useState({
         title: "",
         reason: "",
@@ -61,6 +62,9 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
         scope: "",
         deadline: "",
     });
+
+    /* 何回目の会話化を記録 */
+    const [messageConut, setMessageCount] = useState(0)
 
     // --- 通常の会話 ---
     const sendAiMessage = async () => {
@@ -72,8 +76,20 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
         const messageToSend = [...conversation, latestMessage.content]
 
         console.log("送信する前の会話履歴: ", messageToSend)
+
+        /* 呼び出すAPIの切り替え */
+        const apis = [
+            "/api/goal-ai-title",
+            "/api/goal-ai-reason",
+            "/api/goal-ai-outcome",
+            "/api/goal-ai-scope",
+            "/api/goal-ai-deadline",
+            "/api/goal-ai-subgoals",
+        ]
+        const targetApi = apis[messageConut % apis.length]
+
         try {
-        const res = await fetch("/api/goal-ai-chat", {
+        const res = await fetch(targetApi, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -92,10 +108,17 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
             { role: "user", message: latestMessage.content },
             { role: "AI", message: data.reply },
         ])
+        if (data.subgoalsReply) {
+            setAiConversation(prev => [
+                ...prev,
+                { role: "AI", message: data.subgoalsReply }
+            ])
+        }
         addAiMessage(data.reply)
         addUserMessage(latestMessage.content)
 
         setGoalStatus(data.status);
+        setMessageCount(prev => prev + 1)
         } catch (error) {
             console.error(error)
         }
