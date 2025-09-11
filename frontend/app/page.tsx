@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Monitor, Settings } from "lucide-react"
+import { GoalSetting } from "@/components/goal-setting"
 
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { TimeDistributionChart } from "@/components/time-distribution-chart"
@@ -26,10 +27,17 @@ const initialAppUsage = [
 
 export default function ScreenTimeApp() {
   const [categories, setCategories] = useState([
-    { id: "study", name: "勉強", color: "hsl(var(--chart-1))" },
-    { id: "break", name: "息抜き", color: "hsl(var(--chart-2))" },
-    { id: "other", name: "その他", color: "hsl(var(--chart-3))" },
+  { id: "study", name: "勉強", color: "hsl(var(--chart-1))" },
+  { id: "other", name: "その他", color: "hsl(var(--chart-2))" },
   ])
+
+  /* 常にその他が一番下に来るようにソート */
+  const sortedCategories = [...categories].sort((a, b) => {
+    if (a.id === "other") return 1
+    if (b.id === "other") return -1
+    return 0
+  })
+
   const [newCategoryName, setNewCategoryName] = useState("")
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   const [studyGoal, setStudyGoal] = useState(8)
@@ -62,17 +70,20 @@ export default function ScreenTimeApp() {
     setAppUsage((prev) => prev.map((app) => (app.id === appId ? { ...app, type: newType } : app)))
   }
 
+  const [newCategoryColor, setNewCategoryColor] = useState("#ff0000")
+
   const addCategory = () => {
     if (newCategoryName.trim()) {
       const newId = newCategoryName.toLowerCase().replace(/\s+/g, "_")
       const newCategory = {
         id: newId,
         name: newCategoryName.trim(),
-        color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
+        color: newCategoryColor,
       }
       setCategories([...categories, newCategory])
       setCategoryApps((prev) => ({ ...prev, [newId]: [] }))
       setNewCategoryName("")
+      setNewCategoryColor("#ff0000")
       setIsCategoryDialogOpen(false)
     }
   }
@@ -203,8 +214,9 @@ export default function ScreenTimeApp() {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard">ダッシュボード</TabsTrigger>
+            <TabsTrigger value="goals">目標設定</TabsTrigger>
             <TabsTrigger value="apps">アプリ管理</TabsTrigger>
             <TabsTrigger value="daily">日次レポート</TabsTrigger>
             <TabsTrigger value="weekly">週次レポート</TabsTrigger>
@@ -224,7 +236,11 @@ export default function ScreenTimeApp() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <TimeDistributionChart pieData={pieData} />
 
-              <AppUsageChart appUsage={appUsage} categories={categories} updateAppCategory={updateAppCategory} />
+              <AppUsageChart
+                appUsage={appUsage}
+                categories={sortedCategories}
+                updateAppCategory={updateAppCategory}
+              />
             </div>
 
             <AIFeedback
@@ -236,10 +252,15 @@ export default function ScreenTimeApp() {
             />
           </TabsContent>
 
+          {/* Goals Tab */}
+          <TabsContent value="goals" className="space-y-6">
+            <GoalSetting />
+          </TabsContent>
+
           {/* Apps Management Tab */}
           <TabsContent value="apps" className="space-y-6">
             <CategoryManagement
-              categories={categories}
+              categories={sortedCategories}
               newCategoryName={newCategoryName}
               setNewCategoryName={setNewCategoryName}
               isCategoryDialogOpen={isCategoryDialogOpen}

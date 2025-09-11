@@ -12,7 +12,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus } from "lucide-react"
+import { Plus, Trash2} from "lucide-react"
 
 interface Category {
     id: string
@@ -111,7 +111,7 @@ export function AppManagement({
                             onClick={() => removeAppFromCategory(category.id, app)}
                             className="text-destructive hover:text-destructive"
                         >
-                            削除
+                            <Trash2 className="h-4 w-4" />
                         </Button>
                         </div>
                     ))}

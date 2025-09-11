@@ -24,6 +24,8 @@ interface CategoryManagementProps {
     categories: Category[]
     newCategoryName: string
     setNewCategoryName: (name: string) => void
+    newCategoryColor: string
+    setNewCategoryColor: (color: string) => void
     isCategoryDialogOpen: boolean
     setIsCategoryDialogOpen: (open: boolean) => void
     addCategory: () => void
@@ -34,6 +36,8 @@ export function CategoryManagement({
     categories,
     newCategoryName,
     setNewCategoryName,
+    newCategoryColor,
+    setNewCategoryColor,
     isCategoryDialogOpen,
     setIsCategoryDialogOpen,
     addCategory,
@@ -71,6 +75,17 @@ export function CategoryManagement({
                         onKeyDown={(e) => e.key === "Enter" && addCategory()}
                         />
                     </div>
+                    {/* 色選択 */}
+                    <div>
+                        <Label htmlFor="category-color">色</Label>
+                        <input
+                            id="category-color"
+                            type="color"
+                            value={newCategoryColor}
+                            onChange={(e) => setNewCategoryColor(e.target.value)}
+                            className="w-12 h-8 border rounded"
+                        />
+                    </div>
                     <div className="flex gap-2">
                         <Button onClick={addCategory}>追加</Button>
                         <Button variant="outline" onClick={() => setIsCategoryDialogOpen(false)}>
@@ -83,13 +98,14 @@ export function CategoryManagement({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {/* その他カテゴリを常に一番下に */}
                 {categories.map((category) => (
                 <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
                     <span className="font-medium">{category.name}</span>
                     </div>
-                    {!["study", "break", "other"].includes(category.id) && (
+                    {!["study", "other"].includes(category.id) && (
                     <Button
                         variant="ghost"
                         size="sm"
