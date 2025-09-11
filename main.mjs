@@ -15,7 +15,7 @@ let db;
 let mainWindow;
 // ===== DB初期化 =====
 async function initDb() {
-  // 【修正箇所】データを安全に保存できるフォルダパスの取得
+  // データを安全に保存できるフォルダパスの取得
   const dbPath = path.join(app.getPath('userData'), 'app_usage.db');
   console.log(`データベースの本当の場所: ${dbPath}`);
   db = await open({
@@ -33,12 +33,10 @@ async function initDb() {
   `);
 }
 
-// ===== データ挿入 (デバッグ版) =====
+// ===== データ挿入  =====
 async function logUsage(appName, duration) {
-  // 【目印2】この関数が呼び出されたことを表示
   console.log(`[記録試行] アプリ名: ${appName}, 時間: ${duration}秒`);
   if(appName == app.getName()){
-    // 【目印3】もし自分自身なら、スキップしたことを表示
     console.log(`[記録スキップ] ${appName}は自分自身のため記録しません。`);
     return;
   }
@@ -47,7 +45,6 @@ async function logUsage(appName, duration) {
     `INSERT INTO usage_log (app_name, duration, date) VALUES (?, ?, ?)`,
     [appName, duration, today]
   );
-  // 【目印4】記録が成功したことを表示
   console.log(`[記録成功] ${appName}をデータベースに記録しました。`);
 }
 // ===== 今日の使用状況をアプリごとに集計 =====
@@ -75,7 +72,7 @@ ipcMain.handle('update-category', async (_, { appId, newType }) => {
   return true;
 });
 
-// ===== アクティブウィンドウ監視 (デバッグ版) =====
+// ===== アクティブウィンドウ監視  =====
 async function startTracking() {
   const activeWin = require('active-win');
   let lastApp = null;
@@ -86,7 +83,6 @@ async function startTracking() {
       if (win) {
         const appName = win.owner.name;
         const now = Date.now();
-        // 【目印1】現在アクティブなアプリ名を表示
         console.log(`[監視中] 現在のアプリ: ${appName}`);
         if (lastApp) {
           const durationSec = Math.floor((now - lastTime) / 1000);
@@ -99,10 +95,9 @@ async function startTracking() {
         lastTime = now;
       }
     } catch (err) {
-      // active-winでエラーが起きた場合も表示
       console.error("active-winでエラー:", err);
     }
-  }, 5000); // 5秒間隔にしています
+  }, 5000); // 5秒間隔
 }
 // ===== ウィンドウ生成 =====
 async function createWindow() {
@@ -113,10 +108,10 @@ async function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     }
   });
-  await mainWindow.loadURL('http://localhost:3000'); // ← React dev server
+  await mainWindow.loadURL('http://localhost:3000');
 }
 app.whenReady().then(async () => {
   await initDb();
   await startTracking();
-  // ウィンドウは開かない
+  await createWindow();
 });
