@@ -25,7 +25,7 @@ npm run dev # 開発サーバの立ち上げ(localhost:3000)
 │   ├── goal-creation-dialog.tsx
 │   ├── goal-overview.tsx
 │   ├── goal-progress.tsx
-│   ├── goal-roadmap.tsx
+│   ├── goal-roadmap.tsx    # 目標設定タブの道のりを定義
 │   ├── goal-setting.tsx
 │   ├── goal-subgoals.tsx
 │   ├── settings-dialog.tsx # 設定画面の表示
