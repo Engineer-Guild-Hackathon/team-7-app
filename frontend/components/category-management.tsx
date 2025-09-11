@@ -30,6 +30,7 @@ interface CategoryManagementProps {
     setIsCategoryDialogOpen: (open: boolean) => void
     addCategory: () => void
     removeCategory: (categoryId: string) => void
+    updateCategoryColor: (categoryId: string, color: string) => void
 }
 
 export function CategoryManagement({
@@ -42,6 +43,7 @@ export function CategoryManagement({
     setIsCategoryDialogOpen,
     addCategory,
     removeCategory,
+    updateCategoryColor,
 }: CategoryManagementProps) {
     return (
         <Card>
@@ -104,6 +106,13 @@ export function CategoryManagement({
                     <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
                     <span className="font-medium">{category.name}</span>
+                    {/* 色変更用 */}
+                    <input
+                        type="color"
+                        value={category.color}
+                        onChange={(e) => updateCategoryColor(category.id, e.target.value)}
+                        className="w-8 h-8 border rounded ml-2"
+                    />
                     </div>
                     {!["study", "other"].includes(category.id) && (
                     <Button

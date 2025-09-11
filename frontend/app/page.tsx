@@ -27,8 +27,8 @@ const initialAppUsage = [
 
 export default function ScreenTimeApp() {
   const [categories, setCategories] = useState([
-  { id: "study", name: "勉強", color: "hsl(var(--chart-1))" },
-  { id: "other", name: "その他", color: "hsl(var(--chart-2))" },
+  { id: "study", name: "勉強", color: "#4f46e5" },
+  { id: "other", name: "その他", color: "#22c55e" },
   ])
 
   /* 常にその他が一番下に来るようにソート */
@@ -97,6 +97,14 @@ export default function ScreenTimeApp() {
       return newApps
     })
     setAppUsage((prev) => prev.map((app) => (app.type === categoryId ? { ...app, type: "other" } : app)))
+  }
+
+  const updateCategoryColor = (categoryId: string, color: string) => {
+    setCategories(prev =>
+      prev.map(cat =>
+        cat.id === categoryId ? { ...cat, color } : cat
+      )
+    )
   }
 
   const analyzeWithAI = async () => {
@@ -269,6 +277,7 @@ export default function ScreenTimeApp() {
               setIsCategoryDialogOpen={setIsCategoryDialogOpen}
               addCategory={addCategory}
               removeCategory={removeCategory}
+              updateCategoryColor={updateCategoryColor}
             />
 
             <AppManagement
