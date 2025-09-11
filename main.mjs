@@ -117,6 +117,6 @@ async function createWindow() {
 }
 app.whenReady().then(async () => {
   await initDb();
-  await createWindow();
   await startTracking();
+  // ウィンドウは開かない
 });
