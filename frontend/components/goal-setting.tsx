@@ -85,25 +85,43 @@ export function GoalSetting({}: GoalSettingProps) {
     }
 
     const toggleSubGoal = (goalId: string, subGoalId: string) => {
-        setGoals(
-        goals.map((goal) =>
-            goal.id === goalId
-            ? {
+    setGoals(
+        goals.map((goal) => {
+            if (goal.id !== goalId) return goal;
+
+            // "final" の場合は最終目標の完了をトグル
+            if (subGoalId === "final") {
+                const isCompleted = goal.progress === 100;
+                const totalSubGoals = goal.subGoals.length;
+                const completedSubGoals = goal.subGoals.filter(sub => sub.completed).length;
+                const newProgress = isCompleted
+                    ? Math.round((completedSubGoals / (totalSubGoals + 1)) * 100)
+                    : 100;
+
+                return {
+                    ...goal,
+                    progress: newProgress
+                };
+            }
+
+            // 通常のサブゴールトグル
+            const newSubGoals = goal.subGoals.map((sub) =>
+                sub.id === subGoalId ? { ...sub, completed: !sub.completed } : sub
+            );
+
+            const completedSubGoals = newSubGoals.filter(sub => sub.completed).length;
+            const totalSteps = newSubGoals.length + 1; // 最終目標を含める
+            const achievedSteps = completedSubGoals + (goal.progress === 100 ? 1 : 0);
+            const newProgress = Math.round((achievedSteps / totalSteps) * 100);
+
+            return {
                 ...goal,
-                subGoals: goal.subGoals.map((sub) =>
-                    sub.id === subGoalId ? { ...sub, completed: !sub.completed } : sub,
-                ),
-                progress: Math.round(
-                    ((goal.subGoals.filter((sub) => (sub.id === subGoalId ? !sub.completed : sub.completed)).length +
-                    (goal.subGoals.find((sub) => sub.id === subGoalId)?.completed ? 0 : 1)) /
-                    goal.subGoals.length) *
-                    100,
-                ),
-                }
-            : goal,
-        ),
-        )
-    }
+                subGoals: newSubGoals,
+                progress: newProgress
+            };
+        })
+    );
+};
 
     return (
         <div className="space-y-6">

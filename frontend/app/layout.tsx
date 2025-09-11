@@ -5,9 +5,9 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: 'StudyTime Tracker',
+  description: 'バックグラウンドでアクティブアプリを追跡し、使用時間をカテゴリ別に可視化。AIによる使用時間のフィードバックや、学習目標の設定・小目標管理も可能な学習サポートアプリ。',
+  generator: 'StudyTime AI Tracker v0.1',
 }
 
 export default function RootLayout({
