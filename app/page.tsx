@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Monitor, Settings } from "lucide-react"
@@ -15,30 +15,14 @@ import { SettingsDialog } from "@/components/settings-dialog"
 import { WeeklyReport } from "@/components/weekly-report"
 import { DailyReport } from "@/components/daily-report"
 
-export interface IElectronAPI {
-  getUsage: () => Promise<any[]>; 
-  updateCategory: (appId: number, newType: string) => Promise<boolean>;
-}
-
-declare global {
-  interface Window {
-    api: IElectronAPI;
-  }
-}
-
-interface UsageDataFromBackend {
-  id: number;
-  name: string;
-  total_time: number;
-  type: string;
-}
-
-interface AppUsage {
-  id: number;
-  name: string;
-  time: number; 
-  type: string; 
-}
+const initialAppUsage = [
+  { id: 1, name: "Visual Studio Code", time: 180, type: "study" },
+  { id: 2, name: "Chrome (学習サイト)", time: 120, type: "study" },
+  { id: 3, name: "Notion", time: 90, type: "study" },
+  { id: 4, name: "YouTube", time: 85, type: "break" },
+  { id: 5, name: "Discord", time: 45, type: "break" },
+  { id: 6, name: "Twitter", time: 30, type: "other" },
+]
 
 export default function ScreenTimeApp() {
   const [categories, setCategories] = useState([
@@ -59,8 +43,7 @@ export default function ScreenTimeApp() {
   const [newApp, setNewApp] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("study")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [appUsage, setAppUsage] = useState<AppUsage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [appUsage, setAppUsage] = useState(initialAppUsage)
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [settings, setSettings] = useState({
@@ -74,58 +57,10 @@ export default function ScreenTimeApp() {
     language: "ja",
     exportFormat: "json",
   })
-  const fetchUsageData = async () => {
-    try {
-      const dataFromBackend : UsageDataFromBackend[] = await window.api.getUsage();
-      const formattedData: AppUsage[] = dataFromBackend.map(app => ({
-        id: app.id,
-        name: app.name,
-        time: Math.round(app.total_time / 60), // 秒を分に変換
-        type: app.type,
-      }));
 
-      setAppUsage(formattedData);
-    } catch (error) {
-      console.error("Error fetching usage data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsageData();
-
-    const intervalId = setInterval(() => {
-      fetchUsageData();
-    }, 10000); 
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const updateAppCategory = async (appId: number, newType: string) => {
-    try {
-      await window.api.updateCategory(appId, newType);
-      await fetchUsageData();
-    } catch (error) {
-      console.error("Error updating app category:", error);
-    }
+  const updateAppCategory = (appId: number, newType: string) => {
+    setAppUsage((prev) => prev.map((app) => (app.id === appId ? { ...app, type: newType } : app)))
   }
-
-useEffect(() => {
-  async function fetchUsageData() {
-    if (window.api?.getUsage) {
-      const data = await window.api.getUsage();
-      console.log("Usage data:", data);
-    } else {
-      console.error("window.api is not defined");
-    }
-  }
-
-  fetchUsageData();
-  const interval = setInterval(fetchUsageData, 5000);
-  return () => clearInterval(interval);
-}, []);
-
 
   const addCategory = () => {
     if (newCategoryName.trim()) {
@@ -229,7 +164,7 @@ useEffect(() => {
 
   const resetAllData = () => {
     if (confirm("すべてのデータを削除しますか？この操作は元に戻せません。")) {
-      setAppUsage([])
+      setAppUsage(initialAppUsage)
       setCategories([
         { id: "study", name: "勉強", color: "hsl(var(--chart-1))" },
         { id: "break", name: "息抜き", color: "hsl(var(--chart-2))" },
