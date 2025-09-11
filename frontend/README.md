@@ -17,7 +17,7 @@ npm run dev # 開発サーバの立ち上げ(localhost:3000)
 │   ├── ai-feedback.tsx
 │   ├── ai-goal-dialog.tsx  # AIと会話しながら目標を設定する
 │   ├── app-management.tsx
-│   ├── app-usage-chart.tsx
+│   ├── app-usage-chart.tsx # アプリ別使用時間のカードを定義
 │   ├── category-management.tsx
 │   ├── daily-report.tsx
 │   ├── dashboard-overview.tsx
