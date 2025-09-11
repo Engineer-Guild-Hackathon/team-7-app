@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY_GOALAI!);
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-pro",
+    model: "gemini-2.5-flash-lite",
     generationConfig: {
         temperature: 0.4
     }
@@ -26,45 +26,26 @@ export async function POST(req: Request) {
 
     {
     "reply": "ユーザーに返す自然な会話文",
-    "status": {
-        "title": "string",
-        "reason": "string",
-        "outcome": "string",
-        "scope": "string",
-        "deadline": "string"
-    }
+    "status": "ユーザーから聞き出した目標を達成したい理由"
     }
 
-    ## 収集すべき情報（順番に聞き出す）
-    1. 達成したい「目標」 (title)
-    2. その目標を達成したい「理由」 (reason)
-    3. 達成後に「何をしたいか」 (outcome)
-    4. 目標の達成レベル（どの程度まで） (scope)
-    5. 目標の「期限」 (deadline)
+    "" タスク
+    - ユーザーの最新の発言から「達成したい目標」を抽出してください
+    - ユーザへはなぜその目標を達成したいのかを聞くようにしてください
 
     ## 入力情報
     - ユーザーの最新発言: "${latestMessage}"
     - 会話履歴: "${conversation}"
-    - 現在の収集状況: ${JSON.stringify(status)}
 
     ## ルール
-    - 収集済みの項目は上書きせず保持する
-    - 最新の発言から埋められる項目があれば必ず更新する
-    - まだ埋まっていない情報を順番に自然に質問する
-    - 収集が完了したら小目標を提案して、最終確認する
-    - 必ずJSONのみで返し、余計な文章や説明を絶対に追加しない
-    - 会話履歴を参照して返答を考えてください
+    - 会話履歴を参照し，ユーザーの返答の参考とすること
+    - 返答するときには，ユーザーの最新の発言に対して具体的に肯定的に反応すること
+    - ユーザーは目標を達成したい理由を最新発言として入力しています
 
-    ## 例
+    ## 例(英語の勉強が目的の場合)
     {
-    "reply": "英語学習、いいですね！どんな理由で英語を身につけたいと思っていますか？",
-    "status": {
-        "title": "英語学習",
-        "reason": "",
-        "outcome": "",
-        "scope": "",
-        "deadline": ""
-    }
+    "reply": "いい理由ですね！達成後にどんなことをしたいですか？例えば『海外の大学で授業を受けたい』『外国人の友達と話したい』『英語で研究論文を読めるようになりたい』などがあります。",
+    "status": "留学のため",
     }
     `
 
@@ -77,7 +58,7 @@ export async function POST(req: Request) {
     let parsed;
 
     try {
-          // モデルが余計な文字を付けた場合に備えて { ... } 部分だけ抽出
+        // モデルが余計な文字を付けた場合に備えて { ... } 部分だけ抽出
         const jsonMatch = rawtext.match(/\{[\s\S]*\}/);
         parsed = JSON.parse(jsonMatch ? jsonMatch[0] : '{}');
     } catch (e) {
