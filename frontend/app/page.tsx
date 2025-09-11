@@ -263,6 +263,8 @@ export default function ScreenTimeApp() {
               categories={sortedCategories}
               newCategoryName={newCategoryName}
               setNewCategoryName={setNewCategoryName}
+              newCategoryColor={newCategoryColor}
+              setNewCategoryColor={setNewCategoryColor}
               isCategoryDialogOpen={isCategoryDialogOpen}
               setIsCategoryDialogOpen={setIsCategoryDialogOpen}
               addCategory={addCategory}
