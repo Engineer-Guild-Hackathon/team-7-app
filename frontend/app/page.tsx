@@ -105,26 +105,46 @@ export default function ScreenTimeApp() {
     exportFormat: "json",
   })
 
-  const updateAppCategory = async (appId: number, newType: string) => {
-    setAppUsage((prev) => prev.map((app) => (app.id === appId ? { ...app, type: newType } : app)));
+  const updateAppCategory = async (appId: number, newType: string) => {
+    // 1. 更新対象のアプリ情報を、現在の`appUsage` stateから探す
+    const appToUpdate = appUsage.find(app => app.id === appId);
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/update-category`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appId, newType }),
-      });
-      if (!res.ok) throw new Error('カテゴリ更新APIの呼び出しに失敗');
-      
-      // APIでの更新が成功したら、サーバーから最新のデータを再取得して同期する
-      await fetchUsageData();
-    } catch (err) {
-      console.error("カテゴリの更新に失敗しました:", err);
-      setError("カテゴリの更新に失敗しました。サーバーとの接続を確認してください。");
-      // エラーが起きた場合は、再度データを取得して元の状態に戻す
-      await fetchUsageData();
+    // もし対象が見つからなければ、何もしない（エラーからの保護）
+    if (!appToUpdate) {
+      console.error(`更新対象のアプリ(ID: ${appId})が見つかりませんでした。`);
+      return;
     }
-  };
+    
+    // 2. ユーザー操作に即時反応するための「先行更新」
+    //    まず画面上の表示だけを先に変更しておく
+    setAppUsage((prev) => 
+      prev.map((app) => (app.id === appId ? { ...app, type: newType } : app))
+    );
+
+    try {
+      console.log(`[API送信] アプリ名: ${appToUpdate.name}, 新カテゴリ: ${newType}`);
+
+      // 3. APIには `appId`ではなく`appName`を渡す
+      const res = await fetch(`${API_BASE_URL}/api/update-category`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appName: appToUpdate.name, newType }), // ここを変更！
+      });
+
+      if (!res.ok) {
+        throw new Error('カテゴリ更新APIの呼び出しに失敗');
+      }
+      
+      // APIでの更新が成功したら、念のためサーバーから最新のデータを再取得して同期する
+      await fetchUsageData();
+    } catch (err) {
+      console.error("カテゴリの更新に失敗しました:", err);
+      setError("カテゴリの更新に失敗しました。サーバーとの接続を確認してください。");
+      
+      // 4. エラーが起きた場合は、画面の表示をサーバーの正しい状態に戻す
+      await fetchUsageData();
+    }
+  };
 
   const [newCategoryColor, setNewCategoryColor] = useState("#ff0000")
 
