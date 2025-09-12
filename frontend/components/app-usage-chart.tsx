@@ -20,7 +20,7 @@ interface Category {
 interface AppUsageChartProps {
     appUsage: AppUsage[]
     categories: Category[]
-    updateAppCategory: (appId: number, newType: string) => void
+    updateAppCategory: (appName: string, newType: string) => void
 }
 
 export function AppUsageChart({ appUsage, categories, updateAppCategory }: AppUsageChartProps) {
@@ -60,7 +60,7 @@ export function AppUsageChart({ appUsage, categories, updateAppCategory }: AppUs
                     <span className="text-sm text-muted-foreground min-w-[80px] text-right">
                     {Math.floor(app.time / 3600)}時間{Math.floor(app.time / 60)}分
                     </span>
-                    <Select value={app.type} onValueChange={(value) => updateAppCategory(app.id, value)}>
+                    <Select value={app.type} onValueChange={(value) => updateAppCategory(app.name, value)}>
                     <SelectTrigger className="w-[100px]">
                         <SelectValue />
                     </SelectTrigger>

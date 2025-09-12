@@ -103,47 +103,45 @@ export default function ScreenTimeApp() {
     exportFormat: "json",
   })
 
-  const updateAppCategory = async (appId: number, newType: string) => {
-    // 1. 更新対象のアプリ情報を、現在の`appUsage` stateから探す
-    const appToUpdate = appUsage.find(app => app.id === appId);
+   const updateAppCategory = async (appName: string, newType: string) => {
+    console.log(`[更新開始] アプリ名: ${appName}, 新カテゴリ: ${newType}`);
+    // 1. 【先に】現在のstateから更新対象のアプリ情報を探す
+    const appToUpdate = appUsage.find(app => app.name === appName);
 
-    // もし対象が見つからなければ、何もしない（エラーからの保護）
+    // もし対象のアプリが見つからなければ、処理を中断
     if (!appToUpdate) {
-      console.error(`更新対象のアプリ(ID: ${appId})が見つかりませんでした。`);
+      console.error(`更新対象のアプリ(ID: ${appName})が見つかりませんでした。`);
       return;
     }
-    
+
     // 2. ユーザー操作に即時反応するための「先行更新」
-    //    まず画面上の表示だけを先に変更しておく
-    setAppUsage((prev) => 
-      prev.map((app) => (app.id === appId ? { ...app, type: newType } : app))
+    setAppUsage(prev => 
+      prev.map(app => (app.name === appName ? { ...app, type: newType } : app))
     );
 
-    try {
+    try {
       console.log(`[API送信] アプリ名: ${appToUpdate.name}, 新カテゴリ: ${newType}`);
 
-      // 3. APIには `appId`ではなく`appName`を渡す
-      const res = await fetch(`${API_BASE_URL}/api/update-category`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appName: appToUpdate.name, newType }), // ここを変更！
-      });
+      // 3. 【後に】見つけておいたアプリ名を使ってAPIにリクエストを送信
+      const res = await fetch(`${API_BASE_URL}/api/update-category`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appName: appToUpdate.name, newType }), // 正しいappNameを渡せる
+      });
 
-      if (!res.ok) {
-        throw new Error('カテゴリ更新APIの呼び出しに失敗');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'カテゴリ更新APIの呼び出しに失敗');
       }
-      
-      // APIでの更新が成功したら、念のためサーバーから最新のデータを再取得して同期する
-      await fetchUsageData();
-    } catch (err) {
-      console.error("カテゴリの更新に失敗しました:", err);
-      setError("カテゴリの更新に失敗しました。サーバーとの接続を確認してください。");
-      
-      // 4. エラーが起きた場合は、画面の表示をサーバーの正しい状態に戻す
-      await fetchUsageData();
-    }
-  };
 
+      await fetchUsageData();
+
+    } catch (err) {
+      console.error("カテゴリの更新に失敗しました:", err);
+      setError("カテゴリの更新に失敗しました。サーバーとの接続を確認してください。");
+      await fetchUsageData();
+    }
+  };
   const [newCategoryColor, setNewCategoryColor] = useState("#ff0000")
 
   const addCategory = () => {
@@ -255,27 +253,25 @@ export default function ScreenTimeApp() {
     URL.revokeObjectURL(url)
   }
 
-  const resetAllData = () => {
+  const resetAllData = () => {
     // confirmダイアログは使用せず、ボタンが押されたら即時実行する
     console.warn("データリセットが実行されました。将来的にはAPIを呼び出すように実装してください。");
     
     // フロントエンドの表示を空にする
-    setAppUsage([]);
+     setAppUsage([]);
 
     // 他の関連Stateも初期状態に戻す
-    setCategories([
-      { id: "study", name: "学習", color: "hsl(var(--chart-1))" },
-      { id: "break", name: "休憩", color: "hsl(var(--chart-2))" },
-      { id: "work", name: "仕事", color: "hsl(var(--chart-3))" },
-      { id: "other", name: "その他", color: "hsl(var(--chart-4))" },
-    ]);
-    setCategoryApps({
-      study: ["Visual Studio Code", "Chrome (学習サイト)", "Notion"],
-      break: ["YouTube", "Discord"],
-    });
-    setAiAnalysisResult("");
+    setCategories([
+      { id: "study", name: "勉強", color: "#4f86f7" },
+      { id: "other", name: "その他", color: "#a0a0a0" },
+    ]);
+    setCategoryApps({
+      study: ["Visual Studio Code", "Chrome (学習サイト)", "Notion"],
+      break: ["YouTube", "Discord"],
+    });
+    setAiAnalysisResult("");
     setIsSettingsOpen(false); // ダイアログを閉じる
-  };
+  };
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">データを読み込み中...</div>;
