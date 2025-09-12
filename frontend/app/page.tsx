@@ -27,8 +27,8 @@ const initialAppUsage = [
 
 export default function ScreenTimeApp() {
   const [categories, setCategories] = useState([
-  { id: "study", name: "勉強", color: "#4f46e5" },
-  { id: "other", name: "その他", color: "#22c55e" },
+  { id: "study", name: "勉強", color: "#4f86f7" },
+  { id: "other", name: "その他", color: "#a0a0a0" },
   ])
 
   /* 常にその他が一番下に来るようにソート */
