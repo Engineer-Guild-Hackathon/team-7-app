@@ -16,7 +16,10 @@ let mainWindow;
 // ===== DB初期化 =====
 async function initDb() {
   // データを安全に保存できるフォルダパスの取得
-  const dbPath = path.join(app.getPath('userData'), 'app_usage.db');
+  const dbPath = path.join(__dirname, 'frontend', 'app_usage.db');
+  console.log(`[デバッグ] Electronが認識している__dirname: ${__dirname}`);
+  console.log(`[デバッグ] 最終的に開こうとしているDBパス: ${dbPath}`);  
+
   console.log(`データベースの本当の場所: ${dbPath}`);
   db = await open({
     filename: dbPath,
@@ -25,13 +28,21 @@ async function initDb() {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS usage_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      app_name TEXT,
-      duration INTEGER,
-      date TEXT,
-      type TEXT DEFAULT 'other'
+      app_name TEXT NOT NULL,
+      duration INTEGER NOT NULL,
+      date TEXT NOT NULL
+    )
+  `);
+
+  // 2. カテゴリ管理テーブル
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS app_categories (
+      app_name TEXT PRIMARY KEY,
+      type TEXT NOT NULL DEFAULT 'other'
     )
   `);
 }
+
 
 // ===== データ挿入  =====
 async function logUsage(appName, duration) {
@@ -41,10 +52,16 @@ async function logUsage(appName, duration) {
     return;
   }
   const today = new Date().toISOString().slice(0, 10);
-  await db.run(
-    `INSERT INTO usage_log (app_name, duration, date) VALUES (?, ?, ?)`,
-    [appName, duration, today]
-  );
+    await db.run(
+      'INSERT OR IGNORE INTO app_categories (app_name) VALUES (?)',
+      [appName]
+    );
+    
+    // 使用時間ログを記録
+    await db.run(
+      `INSERT INTO usage_log (app_name, duration, date) VALUES (?, ?, ?)`,
+      [appName, duration, today]
+    );
   console.log(`[記録成功] ${appName}をデータベースに記録しました。`);
 }
 // ===== 今日の使用状況をアプリごとに集計 =====

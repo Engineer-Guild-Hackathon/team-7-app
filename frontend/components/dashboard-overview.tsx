@@ -29,7 +29,7 @@ export function DashboardOverview({
             </CardHeader>
             <CardContent>
             <div className="text-2xl font-bold text-primary">
-                {Math.floor(totalStudyTime / 60)}時間{totalStudyTime % 60}分
+                {Math.floor(totalStudyTime / 3600)}時間{Math.floor(totalStudyTime / 60)}分
             </div>
             <div className="flex items-center gap-2 mt-2">
                 <span className="text-xs text-muted-foreground">目標:</span>
@@ -66,8 +66,8 @@ export function DashboardOverview({
             </CardHeader>
             <CardContent>
             <div className="text-2xl font-bold">
-                {Math.floor((totalStudyTime + totalNonStudyTime) / 60)}時間
-                {(totalStudyTime + totalNonStudyTime) % 60}分
+                {Math.floor((totalStudyTime + totalNonStudyTime) / 3600)}時間
+                {Math.floor((totalStudyTime + totalNonStudyTime) / 60)}分
             </div>
             <p className="text-xs text-muted-foreground">PC使用時間</p>
             </CardContent>
