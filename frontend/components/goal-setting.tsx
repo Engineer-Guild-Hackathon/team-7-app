@@ -123,6 +123,7 @@ export function GoalSetting({}: GoalSettingProps) {
     );
 };
 
+
     return (
         <div className="space-y-6">
         {/* Header */}
