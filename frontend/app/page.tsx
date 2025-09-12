@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Monitor, Settings } from "lucide-react"
@@ -16,19 +16,25 @@ import { SettingsDialog } from "@/components/settings-dialog"
 import { WeeklyReport } from "@/components/weekly-report"
 import { DailyReport } from "@/components/daily-report"
 
-const initialAppUsage = [
-  { id: 1, name: "Visual Studio Code", time: 180, type: "study" },
-  { id: 2, name: "Chrome (学習サイト)", time: 120, type: "study" },
-  { id: 3, name: "Notion", time: 90, type: "study" },
-  { id: 4, name: "YouTube", time: 85, type: "break" },
-  { id: 5, name: "Discord", time: 45, type: "break" },
-  { id: 6, name: "Twitter", time: 30, type: "other" },
-]
+interface AppUsage {
+  id: number;
+  name: string;
+  time: number;
+  type: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  color: string;
+}
 
 export default function ScreenTimeApp() {
   const [categories, setCategories] = useState([
   { id: "study", name: "勉強", color: "hsl(var(--chart-1))" },
-  { id: "other", name: "その他", color: "hsl(var(--chart-2))" },
+  { id: "break", name: "休憩", color: "hsl(var(--chart-2))" },
+  { id: "work", name: "仕事", color: "hsl(var(--chart-3))" },
+  { id: "other", name: "その他", color: "hsl(var(--chart-4))" },
   ])
 
   /* 常にその他が一番下に来るようにソート */
@@ -51,7 +57,40 @@ export default function ScreenTimeApp() {
   const [newApp, setNewApp] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("study")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [appUsage, setAppUsage] = useState(initialAppUsage)
+  const [appUsage, setAppUsage] = useState<AppUsage[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const API_BASE_URL = 'http://localhost:3000';
+
+  const fetchUsageData = useCallback(async () => {
+    console.log("アプリ使用時間データを取得中...");
+    // データ取得前にエラーをリセット
+    setError(null); 
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/app-usage`);
+      if (!res.ok) throw new Error(`APIサーバーからの応答がありません (ステータス: ${res.status})`);
+      const data: AppUsage[] = await res.json();
+
+      console.log(`[成功] ${data.length}件のデータを取得しました。`, data);
+
+      setAppUsage(data);
+    } catch (err: any) {
+      console.error("アプリ使用時間の取得に失敗:", err);
+      setError("サーバーへの接続に失敗しました。APIサーバーが起動しているか確認してください。");
+    } finally {
+      // 常にローディングを終了
+      setIsLoading(false); 
+    }
+  }, []);
+
+  useEffect(() => {
+    // コンポーネント表示時にデータを取得
+    fetchUsageData(); 
+    // 30秒ごとに自動でデータを更新
+    const intervalId = setInterval(fetchUsageData, 30000); 
+    // コンポーネントが非表示になったら定期更新を停止
+    return () => clearInterval(intervalId);
+  }, [fetchUsageData]);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [settings, setSettings] = useState({
@@ -66,9 +105,46 @@ export default function ScreenTimeApp() {
     exportFormat: "json",
   })
 
-  const updateAppCategory = (appId: number, newType: string) => {
-    setAppUsage((prev) => prev.map((app) => (app.id === appId ? { ...app, type: newType } : app)))
-  }
+  const updateAppCategory = async (appId: number, newType: string) => {
+    // 1. 更新対象のアプリ情報を、現在の`appUsage` stateから探す
+    const appToUpdate = appUsage.find(app => app.id === appId);
+
+    // もし対象が見つからなければ、何もしない（エラーからの保護）
+    if (!appToUpdate) {
+      console.error(`更新対象のアプリ(ID: ${appId})が見つかりませんでした。`);
+      return;
+    }
+    
+    // 2. ユーザー操作に即時反応するための「先行更新」
+    //    まず画面上の表示だけを先に変更しておく
+    setAppUsage((prev) => 
+      prev.map((app) => (app.id === appId ? { ...app, type: newType } : app))
+    );
+
+    try {
+      console.log(`[API送信] アプリ名: ${appToUpdate.name}, 新カテゴリ: ${newType}`);
+
+      // 3. APIには `appId`ではなく`appName`を渡す
+      const res = await fetch(`${API_BASE_URL}/api/update-category`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appName: appToUpdate.name, newType }), // ここを変更！
+      });
+
+      if (!res.ok) {
+        throw new Error('カテゴリ更新APIの呼び出しに失敗');
+      }
+      
+      // APIでの更新が成功したら、念のためサーバーから最新のデータを再取得して同期する
+      await fetchUsageData();
+    } catch (err) {
+      console.error("カテゴリの更新に失敗しました:", err);
+      setError("カテゴリの更新に失敗しました。サーバーとの接続を確認してください。");
+      
+      // 4. エラーが起きた場合は、画面の表示をサーバーの正しい状態に戻す
+      await fetchUsageData();
+    }
+  };
 
   const [newCategoryColor, setNewCategoryColor] = useState("#ff0000")
 
@@ -173,22 +249,35 @@ export default function ScreenTimeApp() {
     URL.revokeObjectURL(url)
   }
 
-  const resetAllData = () => {
-    if (confirm("すべてのデータを削除しますか？この操作は元に戻せません。")) {
-      setAppUsage(initialAppUsage)
-      setCategories([
-        { id: "study", name: "勉強", color: "hsl(var(--chart-1))" },
-        { id: "break", name: "息抜き", color: "hsl(var(--chart-2))" },
-        { id: "other", name: "その他", color: "hsl(var(--chart-3))" },
-      ])
-      setCategoryApps({
-        study: ["Visual Studio Code", "Chrome (学習サイト)", "Notion"],
-        break: ["YouTube", "Discord"],
-      })
-      setAiAnalysisResult("")
-    }
-  }
+  const resetAllData = () => {
+    // confirmダイアログは使用せず、ボタンが押されたら即時実行する
+    console.warn("データリセットが実行されました。将来的にはAPIを呼び出すように実装してください。");
+    
+    // フロントエンドの表示を空にする
+    setAppUsage([]);
 
+    // 他の関連Stateも初期状態に戻す
+    setCategories([
+      { id: "study", name: "学習", color: "hsl(var(--chart-1))" },
+      { id: "break", name: "休憩", color: "hsl(var(--chart-2))" },
+      { id: "work", name: "仕事", color: "hsl(var(--chart-3))" },
+      { id: "other", name: "その他", color: "hsl(var(--chart-4))" },
+    ]);
+    setCategoryApps({
+      study: ["Visual Studio Code", "Chrome (学習サイト)", "Notion"],
+      break: ["YouTube", "Discord"],
+    });
+    setAiAnalysisResult("");
+    setIsSettingsOpen(false); // ダイアログを閉じる
+  };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">データを読み込み中...</div>;
+  }
+  if (error) {
+    return <div className="flex items-center justify-center min-h-screen text-red-500">{error}</div>;
+  }
+  
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
