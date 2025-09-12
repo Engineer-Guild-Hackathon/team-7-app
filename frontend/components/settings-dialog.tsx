@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Bell, Shield, Palette, Database } from "lucide-react"
+import { useEffect  } from "react"
 
 interface Settings {
     notifications: boolean
@@ -38,6 +39,15 @@ export function SettingsDialog({
     exportData,
     resetAllData,
 }: SettingsDialogProps) {
+    // 設定反映関数
+    const applySettings = () => {
+        if (settings.theme === "dark") {
+            document.documentElement.classList.add("dark")
+        } else {
+            document.documentElement.classList.remove("dark")
+        }
+        setIsSettingsOpen(false)
+    }
     return (
         <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -144,23 +154,10 @@ export function SettingsDialog({
                     <SelectContent>
                         <SelectItem value="light">ライト</SelectItem>
                         <SelectItem value="dark">ダーク</SelectItem>
-                        <SelectItem value="system">システム設定に従う</SelectItem>
                     </SelectContent>
                     </Select>
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="language">言語</Label>
-                    <Select value={settings.language} onValueChange={(value) => updateSetting("language", value)}>
-                    <SelectTrigger>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ja">日本語</SelectItem>
-                        <SelectItem value="en">English</SelectItem>
-                    </SelectContent>
-                    </Select>
-                </div>
                 </CardContent>
             </Card>
 
@@ -238,7 +235,7 @@ export function SettingsDialog({
             <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>
                 キャンセル
             </Button>
-            <Button onClick={() => setIsSettingsOpen(false)}>設定を保存</Button>
+            <Button onClick={applySettings}>設定を保存</Button>
             </div>
         </DialogContent>
         </Dialog>
