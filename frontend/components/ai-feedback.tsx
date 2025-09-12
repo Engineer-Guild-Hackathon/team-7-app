@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Brain } from "lucide-react"
+import ReactMarkdown from "react-markdown"
 
 interface AIFeedbackProps {
     studyPercentage: number
@@ -35,7 +36,7 @@ export function AIFeedback({
 
             {aiAnalysisResult && (
                 <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
-                <p className="text-sm text-foreground leading-relaxed">{aiAnalysisResult}</p>
+                <ReactMarkdown>{aiAnalysisResult}</ReactMarkdown>
                 </div>
             )}
 

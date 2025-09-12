@@ -32,7 +32,7 @@ export function TimeDistributionChart({ pieData }: TimeDistributionChartProps) {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${Math.floor(Number(value) / 3600)}時間${Math.floor(Number(value) / 60)}分`, ""]} />
+                <Tooltip formatter={(value) => [`${Math.floor(Number(value) / 3600)}時間${Math.floor((Number(value) % 3600) / 60)}分`, ""]} />
             </PieChart>
             </ResponsiveContainer>
         </CardContent>

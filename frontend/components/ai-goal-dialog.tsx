@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { MessageCircle } from "lucide-react"
 import { conversationTalkMemory } from "@/lib/conversation-talk-memory"
+import ReactMarkdown from "react-markdown"
 
 interface Goal {
     id: string
@@ -184,7 +185,7 @@ export function AiGoalDialog({ onCreateGoal }: AiGoalDialogProps) {
                     }`}
                     style={{ whiteSpace: 'pre-wrap' }}
                     >
-                    {msg.message}
+                    <ReactMarkdown>{msg.message}</ReactMarkdown>
                     </div>
                 </div>
                 ))}

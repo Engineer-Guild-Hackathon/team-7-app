@@ -181,22 +181,25 @@ export default function ScreenTimeApp() {
 
   const analyzeWithAI = async () => {
     setAiAnalysisLoading(true)
-    setTimeout(() => {
-      const studyTime = Math.floor(totalStudyTime / 60)
-      const efficiency = studyPercentage
-
-      let analysis = ""
-      if (efficiency >= 80) {
-        analysis = `素晴らしい集中力です！今日は${studyTime}時間の勉強を達成し、効率は${efficiency}%でした。特にVisual Studio Codeでの作業時間が長く、プログラミング学習に集中できています。この調子で継続すれば、目標達成は確実です。`
-      } else if (efficiency >= 60) {
-        analysis = `良いペースで学習が進んでいます。勉強時間は${studyTime}時間、効率は${efficiency}%でした。YouTubeの視聴時間がやや多めなので、休憩時間を意識的に管理することで、さらに効率を上げられそうです。`
-      } else {
-        analysis = `今日の学習効率は${efficiency}%でした。集中時間を増やすために、SNSやエンターテイメント系アプリの使用時間を制限することをお勧めします。ポモドーロテクニックなどの時間管理手法を試してみてください。`
-      }
-
-      setAiAnalysisResult(analysis)
+    try {
+      const res = await fetch("/api/ai-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          usageData: appUsage.map(app => ({
+            app: app.name,
+            category: app.type,
+            time: app.time/60
+          }))
+        }),
+      })
+      const data = await res.json()
+      setAiAnalysisResult(data.feedback)
+    } catch (err) {
+      console.error(err)
+    } finally {
       setAiAnalysisLoading(false)
-    }, 2000)
+    }
   }
 
   const addAppToCategory = () => {
