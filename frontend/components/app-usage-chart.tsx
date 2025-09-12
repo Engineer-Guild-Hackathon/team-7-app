@@ -58,7 +58,7 @@ export function AppUsageChart({ appUsage, categories, updateAppCategory }: AppUs
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="text-sm text-muted-foreground min-w-[80px] text-right">
-                    {Math.floor(app.time / 3600)}時間{Math.floor((app.time / 60) - (app.time / 3600))}分
+                    {Math.floor(app.time / 3600)}時間{Math.floor((app.time % 3600) / 60)}分
                     </span>
                     <Select value={app.type} onValueChange={(value) => updateAppCategory(app.name, value)}>
                     <SelectTrigger className="w-[100px]">
