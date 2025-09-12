@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Bell, Shield, Palette, Database } from "lucide-react"
+import { useEffect  } from "react"
 
 interface Settings {
     notifications: boolean
@@ -38,6 +39,32 @@ export function SettingsDialog({
     exportData,
     resetAllData,
 }: SettingsDialogProps) {
+    // 設定反映関数
+    const applySettings = () => {
+        if (settings.theme === "dark") {
+            document.documentElement.classList.add("dark")
+        } else if (settings.theme === "light") {
+            document.documentElement.classList.remove("dark")
+        } else if (settings.theme === "system") {
+            const mq = window.matchMedia("(prefers-color-scheme: dark)")
+            if (mq.matches) {
+                document.documentElement.classList.add("dark")
+            } else {
+                document.documentElement.classList.remove("dark")
+            }
+            // システム設定変更時も反映
+            const handler = (e: MediaQueryListEvent) => {
+                if (e.matches) {
+                    document.documentElement.classList.add("dark")
+                } else {
+                    document.documentElement.classList.remove("dark")
+                }
+            }
+            mq.addEventListener("change", handler)
+            // クリーンアップは不要（保存時のみ反映）
+        }
+        setIsSettingsOpen(false)
+    }
     return (
         <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -238,7 +265,7 @@ export function SettingsDialog({
             <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>
                 キャンセル
             </Button>
-            <Button onClick={() => setIsSettingsOpen(false)}>設定を保存</Button>
+            <Button onClick={applySettings}>設定を保存</Button>
             </div>
         </DialogContent>
         </Dialog>
