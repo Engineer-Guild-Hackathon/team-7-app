@@ -189,7 +189,7 @@ export default function ScreenTimeApp() {
           usageData: appUsage.map(app => ({
             app: app.name,
             category: app.type,
-            time: app.time
+            time: app.time/60
           }))
         }),
       })
