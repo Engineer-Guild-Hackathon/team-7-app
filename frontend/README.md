@@ -20,7 +20,7 @@ npm run dev # 開発サーバの立ち上げ(localhost:3000)
 │   ├── app-usage-chart.tsx # アプリ別使用時間のカードを定義
 │   ├── category-management.tsx
 │   ├── daily-report.tsx
-│   ├── dashboard-overview.tsx
+│   ├── dashboard-overview.tsx  # ダッシュボードタブの「今日の勉強時間」「勉強効率」「総勉強時間」を定義
 │   ├── goal-card.tsx
 │   ├── goal-creation-dialog.tsx
 │   ├── goal-overview.tsx
