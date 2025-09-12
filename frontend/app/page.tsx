@@ -209,7 +209,7 @@ export default function ScreenTimeApp() {
   useEffect(() => {
     const now = new Date();
     const target = new Date();
-    target.setHours(23, 39, 0, 0);
+    target.setHours(21, 0, 0, 0);
 
     let timeout = target.getTime() - now.getTime();
     if (timeout < 0) timeout += 24 * 60 * 60 * 1000;
@@ -242,7 +242,7 @@ export default function ScreenTimeApp() {
 
     function scheduleNextNotification() {
       const nextTarget = new Date();
-      nextTarget.setHours(23, 39, 0, 0);
+      nextTarget.setHours(21, 0, 0, 0);
       nextTarget.setDate(nextTarget.getDate() + 1);
       const nextTimeout = nextTarget.getTime() - new Date().getTime();
 
@@ -436,18 +436,7 @@ export default function ScreenTimeApp() {
               updateCategoryColor={updateCategoryColor}
             />
 
-            <AppManagement
-/*               categories={categories}
-              categoryApps={categoryApps}
-              newApp={newApp}
-              setNewApp={setNewApp}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              isDialogOpen={isDialogOpen}
-              setIsDialogOpen={setIsDialogOpen}
-              addAppToCategory={addAppToCategory}
-              removeAppFromCategory={removeAppFromCategory} */
-            />
+            <AppManagement/>
           </TabsContent>
 
           {/* Daily Report Tab */}
