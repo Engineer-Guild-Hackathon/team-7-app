@@ -43,25 +43,8 @@ export function SettingsDialog({
     const applySettings = () => {
         if (settings.theme === "dark") {
             document.documentElement.classList.add("dark")
-        } else if (settings.theme === "light") {
+        } else {
             document.documentElement.classList.remove("dark")
-        } else if (settings.theme === "system") {
-            const mq = window.matchMedia("(prefers-color-scheme: dark)")
-            if (mq.matches) {
-                document.documentElement.classList.add("dark")
-            } else {
-                document.documentElement.classList.remove("dark")
-            }
-            // システム設定変更時も反映
-            const handler = (e: MediaQueryListEvent) => {
-                if (e.matches) {
-                    document.documentElement.classList.add("dark")
-                } else {
-                    document.documentElement.classList.remove("dark")
-                }
-            }
-            mq.addEventListener("change", handler)
-            // クリーンアップは不要（保存時のみ反映）
         }
         setIsSettingsOpen(false)
     }
@@ -171,23 +154,10 @@ export function SettingsDialog({
                     <SelectContent>
                         <SelectItem value="light">ライト</SelectItem>
                         <SelectItem value="dark">ダーク</SelectItem>
-                        <SelectItem value="system">システム設定に従う</SelectItem>
                     </SelectContent>
                     </Select>
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="language">言語</Label>
-                    <Select value={settings.language} onValueChange={(value) => updateSetting("language", value)}>
-                    <SelectTrigger>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ja">日本語</SelectItem>
-                        <SelectItem value="en">English</SelectItem>
-                    </SelectContent>
-                    </Select>
-                </div>
                 </CardContent>
             </Card>
 
