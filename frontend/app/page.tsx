@@ -18,6 +18,7 @@ import { DailyReport } from "@/components/daily-report"
 import next from "next"
 import { permission } from "process"
 
+
 interface AppUsage {
   id: number;
   name: string;
@@ -437,6 +438,7 @@ export default function ScreenTimeApp() {
             />
 
             <AppManagement/>
+
           </TabsContent>
 
           {/* Daily Report Tab */}

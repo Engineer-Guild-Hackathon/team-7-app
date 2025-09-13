@@ -68,6 +68,7 @@ export function DashboardOverview({
             <div className="text-2xl font-bold">
                 {Math.floor((totalStudyTime + totalNonStudyTime) / 3600)}時間
                 {Math.floor(((totalStudyTime + totalNonStudyTime) % 3600) / 60)}分
+
             </div>
             <p className="text-xs text-muted-foreground">PC使用時間</p>
             </CardContent>
