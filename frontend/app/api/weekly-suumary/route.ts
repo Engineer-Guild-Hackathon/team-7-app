@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
 /**
- * タイムゾーンを考慮した過去N日間の開始日を 'YYYY-MM-DD' 形式で取得します。
- * @param daysAgo 遡る日数
- * @returns {string} 'YYYY-MM-DD'形式の日付文字列
+ * 
+ * @param daysAgo
+ * @returns {string}
  */
 function getStartDate(daysAgo: number): string {
   const date = new Date();
-  date.setDate(date.getDate() - (daysAgo - 1)); // N日前なのでN-1を引く
+  date.setDate(date.getDate() - (daysAgo - 1));
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -16,9 +16,8 @@ function getStartDate(daysAgo: number): string {
 }
 
 /**
- * 特定の日付が、今日から見て第何週目に当たるかを計算します (今週が第4週)。
- * @param dateStr 'YYYY-MM-DD'形式の日付
- * @returns {number} 週番号 (1-4)
+ * @param dateStr 
+ * @returns {number} 
  */
 function getWeekNumber(dateStr: string): number {
   const today = new Date();
@@ -37,8 +36,7 @@ export async function GET() {
   console.log(`[API LOG] GET /api/monthly-summary が呼び出されました。`);
   try {
     const db = await getDb();
-    const startDate = getStartDate(28); // 過去4週間 (28日分) のデータを取得
-
+    const startDate = getStartDate(28);
     const rows: { date: string, type: string, duration: number }[] = await db.all(`
       SELECT l.date, c.type, l.duration
       FROM usage_log l
@@ -88,7 +86,6 @@ export async function GET() {
       studyPercentage: totalTimeSeconds > 0 ? Math.round((totalStudyTimeSeconds / totalTimeSeconds) * 100) : 0,
     };
     
-    // AI改善提案 (簡易版)
     const suggestions = [];
     if (summary.studyPercentage < 50) {
         suggestions.push({

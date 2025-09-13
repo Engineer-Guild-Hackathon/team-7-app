@@ -7,8 +7,6 @@ export async function GET() {
     const db = await getDb();
     const today = new Date().toISOString().slice(0, 10);
 
-    // Electronのmain.mjsで使っていた、より堅牢なクエリを採用
-    // アプリごとにカテゴリと合計時間を集計して取得
     const appUsage = await db.all(`
       SELECT
         ul.app_name as name,
@@ -26,12 +24,11 @@ export async function GET() {
         time DESC
     `, [today]);
 
-    // 取得したデータをJSONとして返す
     return NextResponse.json(appUsage);
 
   } catch (error) {
     console.error('API [app-usage] Error:', error);
-    // エラーが発生した場合は、500エラーとエラーメッセージを返す
+
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

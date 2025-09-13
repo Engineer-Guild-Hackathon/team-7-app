@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-//import {conversationTalkMemory } from "@/lib/conversation-talk-memory";
+
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY_GOALAI!);
 const model = genAI.getGenerativeModel({
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     let parsed;
 
     try {
-        // モデルが余計な文字を付けた場合に備えて { ... } 部分だけ抽出
+
         const jsonMatch = rawtext.match(/\{[\s\S]*\}/);
         parsed = JSON.parse(jsonMatch ? jsonMatch[0] : '{}');
     } catch (e) {

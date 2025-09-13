@@ -108,16 +108,14 @@ export default function ScreenTimeApp() {
 
    const updateAppCategory = async (appName: string, newType: string) => {
     console.log(`[更新開始] アプリ名: ${appName}, 新カテゴリ: ${newType}`);
-    // 1. 【先に】現在のstateから更新対象のアプリ情報を探す
+
     const appToUpdate = appUsage.find(app => app.name === appName);
 
-    // もし対象のアプリが見つからなければ、処理を中断
     if (!appToUpdate) {
       console.error(`更新対象のアプリ(ID: ${appName})が見つかりませんでした。`);
       return;
     }
 
-    // 2. ユーザー操作に即時反応するための「先行更新」
     setAppUsage(prev => 
       prev.map(app => (app.name === appName ? { ...app, type: newType } : app))
     );
@@ -125,11 +123,10 @@ export default function ScreenTimeApp() {
     try {
       console.log(`[API送信] アプリ名: ${appToUpdate.name}, 新カテゴリ: ${newType}`);
 
-      // 3. 【後に】見つけておいたアプリ名を使ってAPIにリクエストを送信
       const res = await fetch(`${API_BASE_URL}/api/update-category`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appName: appToUpdate.name, newType }), // 正しいappNameを渡せる
+        body: JSON.stringify({ appName: appToUpdate.name, newType }), 
       });
 
       if (!res.ok) {
@@ -328,13 +325,11 @@ export default function ScreenTimeApp() {
   }
 
   const resetAllData = () => {
-    // confirmダイアログは使用せず、ボタンが押されたら即時実行する
+
     console.warn("データリセットが実行されました。将来的にはAPIを呼び出すように実装してください。");
-    
-    // フロントエンドの表示を空にする
+   
      setAppUsage([]);
 
-    // 他の関連Stateも初期状態に戻す
     setCategories([
       { id: "study", name: "勉強", color: "#4f86f7" },
       { id: "other", name: "その他", color: "#a0a0a0" },
@@ -344,7 +339,7 @@ export default function ScreenTimeApp() {
       break: ["YouTube", "Discord"],
     });
     setAiAnalysisResult("");
-    setIsSettingsOpen(false); // ダイアログを閉じる
+    setIsSettingsOpen(false); 
   };
 
   if (isLoading) {

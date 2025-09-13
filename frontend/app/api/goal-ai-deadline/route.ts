@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-//import {conversationTalkMemory } from "@/lib/conversation-talk-memory";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY_GOALAI!);
 const model = genAI.getGenerativeModel({
