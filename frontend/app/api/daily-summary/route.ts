@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
 /**
- * タイムゾーンを考慮した過去N日間の日付リストを 'YYYY-MM-DD' 形式で生成します。
- * @param days 遡る日数
- * @returns {string[]} 日付文字列の配列
+ * 
+ * @param days 
+ * @returns {string[]} 
  */
 function getLastNDates(days: number): string[] {
   const dates: string[] = [];
@@ -42,12 +42,11 @@ export async function GET() {
         l.date, c.type
     `, [firstDay]);
 
-    // 曜日を取得するためのヘルパー
     const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
 
     // 過去7日間分のデータを整形
     const weeklyData = last7Days.map(dateStr => {
-      const dateObj = new Date(dateStr + 'T00:00:00'); // タイムゾーンのズレを防ぐためT00:00:00を付与
+      const dateObj = new Date(dateStr + 'T00:00:00');
       const name = dayOfWeek[dateObj.getDay()];
 
       const dailyLogs = rows.filter(r => r.date === dateStr);
@@ -62,7 +61,6 @@ export async function GET() {
 
       return {
         name: name,
-        // 時間（秒）を時間（hour）に変換し、小数点以下2桁に丸める
         study: parseFloat((studyTime / 3600).toFixed(2)),
         nonStudy: parseFloat((nonStudyTime / 3600).toFixed(2)),
       };

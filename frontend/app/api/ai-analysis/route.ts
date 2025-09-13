@@ -1,4 +1,3 @@
-// app/api/ai-analysis/route.ts
 import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 

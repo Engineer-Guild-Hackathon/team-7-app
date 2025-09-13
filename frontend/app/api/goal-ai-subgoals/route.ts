@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
         let parsed;
         try {
-            /* JSON 部分だけを抜き出し */
+    
             const jsonMatch = rawtext.match(/\{[\s\S]*\}/);
             parsed = JSON.parse(jsonMatch ? jsonMatch[0] : '{}');
         } catch (e) {
