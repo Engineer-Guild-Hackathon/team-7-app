@@ -15,6 +15,9 @@ import { AppManagement } from "@/components/app-management"
 import { SettingsDialog } from "@/components/settings-dialog"
 import { WeeklyReport } from "@/components/weekly-report"
 import { DailyReport } from "@/components/daily-report"
+import next from "next"
+import { permission } from "process"
+
 
 interface AppUsage {
   id: number;
@@ -202,6 +205,74 @@ export default function ScreenTimeApp() {
     }
   }
 
+  
+  /* ローカル通知 */
+  useEffect(() => {
+    const now = new Date();
+    const target = new Date();
+    target.setHours(21, 0, 0, 0);
+
+    let timeout = target.getTime() - now.getTime();
+    if (timeout < 0) timeout += 24 * 60 * 60 * 1000;
+
+    const timer = setTimeout(async() => {
+      try {
+        const res = await fetch("/api/ai-push-report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            usageData: appUsage.map(app => ({
+              app: app.name,
+              category: app.type,
+              time: app.time/60
+            }))
+          }),
+        });
+        const data = await res.json();
+        const message = data.message;
+
+        console.log("通知: ", message)
+
+        new Notification("AIフィードバック", { body: message });
+      } catch (e) {
+        console.error("通知用API呼び出し失敗: ", e);
+      }
+
+      scheduleNextNotification();
+    }, timeout);
+
+    function scheduleNextNotification() {
+      const nextTarget = new Date();
+      nextTarget.setHours(21, 0, 0, 0);
+      nextTarget.setDate(nextTarget.getDate() + 1);
+      const nextTimeout = nextTarget.getTime() - new Date().getTime();
+
+      setTimeout(async () => {
+        try {
+          const res = await fetch("/api/ai-push-report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              usageData: appUsage.map(app => ({
+                app: app.name,
+                category: app.type,
+                time: app.time/60
+              }))
+            }),
+          });
+          const data = await res.json();
+          const message = data.message;
+          new Notification("AIフィードバック", { body: message });
+        } catch (e) {
+          console.error("通知用API呼び出し失敗: ", e);
+        }
+        scheduleNextNotification();
+      }, nextTimeout);
+    }
+    
+    return () => clearTimeout(timer);
+  }, [appUsage]);
+
   const addAppToCategory = () => {
     if (newApp.trim() && selectedCategory !== "other") {
       setCategoryApps((prev) => ({
@@ -366,18 +437,8 @@ export default function ScreenTimeApp() {
               updateCategoryColor={updateCategoryColor}
             />
 
-            <AppManagement
-              categories={categories}
-              categoryApps={categoryApps}
-              newApp={newApp}
-              setNewApp={setNewApp}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              isDialogOpen={isDialogOpen}
-              setIsDialogOpen={setIsDialogOpen}
-              addAppToCategory={addAppToCategory}
-              removeAppFromCategory={removeAppFromCategory}
-            />
+            <AppManagement/>
+
           </TabsContent>
 
           {/* Daily Report Tab */}
